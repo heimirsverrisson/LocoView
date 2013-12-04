@@ -3,21 +3,19 @@ package com.coolprimes.locoview;
 import java.util.Locale;
 
 import android.app.Activity;
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.google.android.gms.maps.MapFragment;
+
 
 public class MapActivity extends Activity {
 
@@ -45,7 +43,7 @@ public class MapActivity extends Activity {
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+        mSectionsPagerAdapter = new SectionsPagerAdapter(this, getFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -81,16 +79,22 @@ public class MapActivity extends Activity {
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
+        private Activity parentActivity;
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        public SectionsPagerAdapter(Activity parentActivity,FragmentManager fm) {
             super(fm);
+            this.parentActivity = parentActivity;
         }
 
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            if(position == 0){
+                return LocoMapFragment.newInstance(this.parentActivity);
+            } else {
+                return PlaceholderFragment.newInstance(position + 1);
+            }
         }
 
         @Override
@@ -118,6 +122,7 @@ public class MapActivity extends Activity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+        private static final String D_TAG = "PlaceholderFragment";
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -129,21 +134,14 @@ public class MapActivity extends Activity {
          * number.
          */
         public static Fragment newInstance(int sectionNumber) {
-            if(position == 0){
-                    MapFragment mapFragment = MapFragment.newInstance();
-                    FragmentTransaction fragmentTransaction =
-                            getFragmentManager().beginTransaction();
-                    fragmentTransaction.add(R.id.map, mapFragment);
-                    fragmentTransaction.commit();
-                return mapFragment;
-            } else {
-
-                PlaceholderFragment fragment = new PlaceholderFragment();
-                Bundle args = new Bundle();
-                args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-                fragment.setArguments(args);
-                return fragment;
+            if(BuildConfig.DEBUG){
+                Log.d(D_TAG,String.format("Fragment.newInstance(%d)", sectionNumber));
             }
+            PlaceholderFragment fragment = new PlaceholderFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            return fragment;
         }
 
         public PlaceholderFragment() {
